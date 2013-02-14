@@ -31,7 +31,7 @@ public class Exercise1Test {
   }
 
   @Test
-  public void when_key_not_in_cache_then_calling_db() throws InterruptedException {
+  public void when_key_1_not_in_cache_then_calling_db() throws InterruptedException {
 
     long id = System.currentTimeMillis();
     exercise1.findById(id);
@@ -39,7 +39,7 @@ public class Exercise1Test {
   }
 
   @Test
-  public void when_key_in_cache_then_calling_db() {
+  public void when_key_2_in_cache_then_calling_db() {
     long id = System.currentTimeMillis();
     Cache cache = exercise1.getCache();
     Wine wine = WineBuilder.nextWithId();

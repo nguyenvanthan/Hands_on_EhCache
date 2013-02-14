@@ -1,9 +1,16 @@
 package org.coenraets.service;
 
-import net.sf.ehcache.Cache;
-import org.coenraets.model.Wine;
-
 import java.util.List;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.Configuration;
+
+import org.coenraets.model.Wine;
+import org.coenraets.util.CacheHelper;
+import org.coenraets.util.ConnectionHelper;
 
 /**
  * Des indices pour créer le cache sont dans le fichier tips1.txt dans ce meme répertoire !
@@ -15,7 +22,9 @@ public class Exercise1 implements WineService {
   private Cache wineCache;
 
   public Exercise1() {
-      //TODO
+	  // initialize cache and dao
+	  wineCache = CacheHelper.getCacheWriteThough();
+	  mysql = new WineMysql();
   }
 
 
@@ -33,8 +42,16 @@ public class Exercise1 implements WineService {
 
   @Override
   public Wine findById(long id) {
-   //TODO
-    return null;
+    // cherche dans le cache
+	Element e =  wineCache.get(id);
+	Wine result = null;
+	if (e != null) {
+		result = (Wine)e.getObjectValue();
+	} else {
+		result = mysql.findById(id);
+		wineCache.put(new Element(id, result));
+	}
+    return result;
   }
 
   @Override

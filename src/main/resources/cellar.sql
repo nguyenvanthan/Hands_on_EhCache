@@ -1,3 +1,8 @@
+CREATE DATABASE wine;
+
+use wine;
+
+
 -- MySQL dump 10.13  Distrib 5.5.15, for osx10.6 (i386)
 --
 -- Host: localhost    Database: cellar

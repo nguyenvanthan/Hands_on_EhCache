@@ -1,13 +1,15 @@
 package org.coenraets.service;
 
-import net.sf.ehcache.pool.sizeof.AgentSizeOf;
-import org.coenraets.model.Wine;
-import org.coenraets.util.WineBuilder;
-
 import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+
+import org.coenraets.model.Wine;
+import org.coenraets.util.CacheHelper;
+import org.coenraets.util.WineBuilder;
 
 /**
  * This should create long GC pauses then Full GCs
@@ -28,13 +30,8 @@ public class Exercise8 {
   public static void main(String[] args) {
     Runtime runtime = Runtime.getRuntime();
 
-    Map<Integer, Wine> container = new HashMap<Integer, Wine>();
-
-    AgentSizeOf sizeOfEngine = new AgentSizeOf();
-    for (int i = 0; i < 10; i++) {
-      System.out
-          .println("Size of an object: " + sizeOfEngine.deepSizeOf(1000, true, WineBuilder.next()).getCalculated());
-    }
+    Cache container = CacheHelper.getCacheWithoutWriter();
+    
 
     Producer producer = new Producer(container);
     Consumer consumer = new Consumer(container);
@@ -56,9 +53,9 @@ public class Exercise8 {
     Runtime runtime = Runtime.getRuntime();
     SecureRandom rnd = new SecureRandom();
     int cnt = 0;
-    Map<Integer, Wine> container;
+    Cache container;
 
-    public Producer(Map<Integer, Wine> container) {
+    public Producer(Cache container) {
       this.container = container;
     }
 
@@ -66,11 +63,18 @@ public class Exercise8 {
     public void run() {
       System.out.println("Producer started....");
 
+      
       while (true) {
-        if (cnt > 14000000) {
-          container.remove(rnd.nextInt(container.size()));
+    	  try {
+			Thread.sleep(20);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	  if (cnt > 14000000) {
+          container.remove(rnd.nextInt(container.getSize()));
         }
-        container.put(cnt++, WineBuilder.next());
+        container.put(new Element(cnt++, WineBuilder.next()));
       }
     }
 
@@ -79,9 +83,9 @@ public class Exercise8 {
   public static class Consumer extends Thread {
 
     Random rnd = new Random();
-    Map<Integer, Wine> container;
+    Cache container;
 
-    public Consumer(Map<Integer, Wine> container) {
+    public Consumer(Cache container) {
       this.container = container;
     }
 
@@ -95,7 +99,14 @@ public class Exercise8 {
       }
 
       while (true) {
-        int size = container.size();
+    	  
+    	  try {
+  			Thread.sleep(20);
+  		} catch (InterruptedException e) {
+  			// TODO Auto-generated catch block
+  			e.printStackTrace();
+  		}
+        int size = container.getSize();
         int key = rnd.nextInt(size);
         long start = System.currentTimeMillis();
         container.get(key);

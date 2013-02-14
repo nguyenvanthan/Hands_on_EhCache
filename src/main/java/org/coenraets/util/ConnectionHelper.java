@@ -18,7 +18,7 @@ public class ConnectionHelper {
     try {
       Class.forName("com.mysql.jdbc.Driver");
       return DriverManager.getConnection(
-          "jdbc:mysql://localhost/wine?user=root");
+          "jdbc:mysql://localhost/wine?user=root&password=meia");
     } catch (SQLException e) {
       throw e;
     } catch (ClassNotFoundException e) {
